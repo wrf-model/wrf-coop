@@ -1,8 +1,8 @@
 #
 FROM centos:7
-MAINTAINER Dave Gill <gill@ucar.edu>
+MAINTAINER Kelly Werner <kkeene@ucar.edu>
 
-ENV NML_VERSION 4.2
+ENV NML_VERSION 4.4
 
 # Set up base OS environment
 
