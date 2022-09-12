@@ -77,15 +77,16 @@ ENV NETCDF /wrf/libs/netcdf
 RUN mkdir -p ${NETCDF}/BUILD_DIR
 RUN source /opt/rh/devtoolset-10/enable \
  && cd ${NETCDF}/BUILD_DIR \
- && curl -L -O https://github.com/Unidata/netcdf-c/archive/v4.6.2.tar.gz \
+ && curl -L -O https://github.com/Unidata/netcdf-c/archive/refs/tags/v4.7.4.tar.gz \
  && curl -L -O https://github.com/Unidata/netcdf-fortran/archive/v4.4.5.tar.gz \
  && curl -L -O https://github.com/Unidata/netcdf4-python/archive/v1.5.3rel.tar.gz \
- && tar -xf v4.6.2.tar.gz \
- && cd netcdf-c-4.6.2 \
+ && tar -xf v4.7.4.tar.gz \
+ && cd netcdf-c-4.7.4 \
  && ./configure --enable-shared --prefix=${NETCDF} &> /wrf/libs/build_log_ncc_config \
  && echo dummy printout to keep travis happy ncc config \
  && make install &> /wrf/libs/build_log_ncc_make \
- && echo dummy printout to keep travis happy ncc make
+ && echo dummy printout to keep travis happy ncc make \
+ && cd /
 
 # Build netCDF Fortran libraries
 RUN source /opt/rh/devtoolset-10/enable \
