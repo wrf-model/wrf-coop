@@ -129,7 +129,9 @@ RUN source /opt/rh/devtoolset-10/enable \
  && python3.8 -m pip install wheel \
  && python3.8 setup.py build \
  && CPPFLAGS="-I${NETCDF}/include -I/usr/local/include" LDFLAGS="-L${NETCDF}/lib -L/usr/local/lib" python3.8 setup.py install \
- && echo dummy printout to keep travis happy ncf4-python install
+ && echo dummy printout to keep travis happy ncf4-python install \
+ && cd / \
+ && rm -rf ${NETCDF}/BUILD_DIR
 
 RUN mkdir -p /var/run/sshd \
     && ssh-keygen -A \
