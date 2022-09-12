@@ -60,13 +60,14 @@ RUN source /opt/rh/devtoolset-10/enable \
 RUN mkdir -p /wrf/libs/hdf5/BUILD_DIR
 RUN source /opt/rh/devtoolset-10/enable \
  && cd /wrf/libs/hdf5/BUILD_DIR \
- && git clone https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git \
- && cd hdf5 \
- && git checkout hdf5-1_10_4 \
+ && wget https://www2.mmm.ucar.edu/people/duda/files/mpas/sources/hdf5-1.10.5.tar.bz2 \
+ && tar -xf hdf5-1.10.5.tar.bz2 \
+ && cd hdf5-1.10.5 \
  && ./configure --enable-fortran --enable-cxx --enable-shared --prefix=/usr/local/ &> /wrf/libs/build_log_hdf5_config \
  && echo dummy printout to keep travis happy hdf5 config \
  && make install &> /wrf/libs/build_log_hdf5_make \
  && echo dummy printout to keep travis happy hdf5 make \
+ && cd / \
  && rm -rf /wrf/libs/hdf5/BUILD_DIR
 ENV LD_LIBRARY_PATH /usr/local/lib
 
