@@ -78,7 +78,7 @@ RUN mkdir -p ${NETCDF}/BUILD_DIR
 RUN source /opt/rh/devtoolset-10/enable \
  && cd ${NETCDF}/BUILD_DIR \
  && curl -L -O https://github.com/Unidata/netcdf-c/archive/refs/tags/v4.7.4.tar.gz \
- && curl -L -O https://github.com/Unidata/netcdf-fortran/archive/v4.4.5.tar.gz \
+ && curl -L -O https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v4.6.0.tar.gz \
  && curl -L -O https://github.com/Unidata/netcdf4-python/archive/v1.5.3rel.tar.gz \
  && tar -xf v4.7.4.tar.gz \
  && cd netcdf-c-4.7.4 \
@@ -92,13 +92,14 @@ RUN source /opt/rh/devtoolset-10/enable \
 RUN source /opt/rh/devtoolset-10/enable \
  && env \
  && cd ${NETCDF}/BUILD_DIR \
- && tar -xf v4.4.5.tar.gz \
- && cd netcdf-fortran-4.4.5/ \
- && export LD_LIBRARY_PATH=${NETCDF}/lib:${LD_LIBRARY_PATH} \
+ && tar -xf v4.6.0.tar.gz \
+ && cd netcdf-fortran-4.6.0/ \
+ && export LD_LIBRARY_PATH=${NETCDF}/lib:/usr/local/lib:${LD_LIBRARY_PATH} \
  && CPPFLAGS=-I${NETCDF}/include LDFLAGS=-L${NETCDF}/lib ./configure --enable-shared --prefix=${NETCDF} &> /wrf/libs/build_log_ncf_config \
  && echo dummy printout to keep travis happy ncf config \
  && make install &> /wrf/libs/build_log_ncf_make \
- && echo dummy printout to keep travis happy ncf make
+ && echo dummy printout to keep travis happy ncf make \
+ && cd /
 
 # Install and setup Python3.8
 RUN yum -y groupinstall "Development Tools"
