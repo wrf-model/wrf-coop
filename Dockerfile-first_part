@@ -153,14 +153,16 @@ RUN echo export LDFLAGS="-lm" >> /etc/bashrc \
  && echo export JASPERINC=/usr/include/jasper/ >> /etc/bashrc \
  && echo export JASPERLIB=/usr/lib64/ >> /etc/bashrc \
  && echo export LD_LIBRARY_PATH="/opt/rh/devtoolset-10/root/usr/lib/gcc/aarch64-redhat-linux/10:/usr/lib64/openmpi/lib:${NETCDF}/lib:${LD_LIBRARY_PATH}" >> /etc/bashrc  \
- && echo export PATH=".:/opt/rh/devtoolset-10/root/usr/bin:/usr/lib64/openmpi/bin:${NETCDF}/bin:$PATH" >> /etc/bashrc
+ && echo export PATH=".:/opt/rh/devtoolset-10/root/usr/bin:/usr/lib64/openmpi/bin:${NETCDF}/bin:$PATH" >> /etc/bashrc \
+ && echo export NCARG_ROOT=/usr/local >> /etc/bashrc
 
 RUN echo setenv LDFLAGS "-lm" >> /etc/csh.cshrc \
  && echo setenv NETCDF "${NETCDF}" >> /etc/csh.cshrc \
  && echo setenv JASPERINC "/usr/include/jasper/" >> /etc/csh.cshrc \
  && echo setenv JASPERLIB "/usr/lib64/" >> /etc/csh.cshrc \
  && echo setenv LD_LIBRARY_PATH "/opt/rh/devtoolset-10/root/usr/lib/gcc/aarch64-redhat-linux/10:/usr/lib64/openmpi/lib:${NETCDF}/lib:${LD_LIBRARY_PATH}" >> /etc/csh.cshrc \
- && echo setenv PATH ".:/opt/rh/devtoolset-10/root/usr/bin:/usr/lib64/openmpi/bin:${NETCDF}/bin:$PATH" >> /etc/csh.cshrc
+ && echo setenv PATH ".:/opt/rh/devtoolset-10/root/usr/bin:/usr/lib64/openmpi/bin:${NETCDF}/bin:$PATH" >> /etc/csh.cshrc \
+ && echo setenv NCARG_ROOT /usr/local >> /etc/csh.cshrc
 
 RUN mkdir /wrf/.ssh ; echo "StrictHostKeyChecking no" > /wrf/.ssh/config
 COPY default-mca-params.conf /wrf/.openmpi/mca-params.conf
