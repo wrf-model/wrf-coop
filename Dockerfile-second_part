@@ -10,7 +10,7 @@ RUN git clone --recurse-submodule https://github.com/wrf-model/WRF.git WRF \
   && git checkout release-v4.4.1 \
   && cd ..
 
-RUN git clone https://github.com/davegill/SCRIPTS.git SCRIPTS \
+RUN git clone https://github.com/wrf-model/SCRIPTS.git SCRIPTS \
   && cp SCRIPTS/rd_l2_norm.py . && chmod 755 rd_l2_norm.py \
   && cp SCRIPTS/script.csh .    && chmod 755 script.csh    \
   && ln -sf SCRIPTS/Namelists . 
