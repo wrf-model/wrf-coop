@@ -1,5 +1,5 @@
 #
-FROM davegill/wrf-coop:fourteenthtry
+FROM kkeene44/wrf-coop:version16
 MAINTAINER Kelly Werner <kkeene@ucar.edu>
 
 #RUN echo _HERE1_
