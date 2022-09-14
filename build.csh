@@ -172,8 +172,8 @@ set SERIALBG  = ( F           F           F             F           F           
 set NP        = ( $PROCS      $PROCS      $PROCS        $PROCS      $PROCS      $PROCS         $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS                  $PROCS         )
 
 
-set SERIAL_OPT = 32
-set OPENMP_OPT = 33
+set SERIAL_OPT = 32 
+set OPENMP_OPT = 33 
 set    MPI_OPT = 34
 
 #	Info to determine if we eventually accomplish what we originally intended.
