@@ -1,25 +1,16 @@
 #
-FROM davegill/wrf-coop:fifteenthtry
-MAINTAINER Dave Gill <gill@ucar.edu>
+FROM kkeene44/wrf-coop:version16
+MAINTAINER Kelly Werner <kkeene@ucar.edu>
 
-#RUN echo _HERE1_
-#RUN git clone https://github.com/davegill/WRF.git davegill/WRF \
-#  && cd davegill/WRF \
-#  && git fetch origin +refs/pull/4/merge: \
-#  && git checkout -qf FETCH_HEAD \
-#  && cd .. \
-#  && mv WRF /wrf/WRF
-#RUN echo _HERE2_
-
-RUN git clone https://github.com/wrf-model/WRF.git WRF \
+RUN git clone --recurse-submodule https://github.com/wrf-model/WRF.git WRF \
   && cd WRF \
-  && git checkout release-v4.2.1 \
+  && git checkout release-v4.4.2 \
   && git checkout master \
   && git checkout develop \
-  && git checkout release-v4.2 \
+  && git checkout release-v4.4.1 \
   && cd ..
 
-RUN git clone https://github.com/davegill/SCRIPTS.git SCRIPTS \
+RUN git clone https://github.com/wrf-model/SCRIPTS.git SCRIPTS \
   && cp SCRIPTS/rd_l2_norm.py . && chmod 755 rd_l2_norm.py \
   && cp SCRIPTS/script.csh .    && chmod 755 script.csh    \
   && ln -sf SCRIPTS/Namelists . 
