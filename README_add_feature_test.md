@@ -38,7 +38,7 @@ No other changes are required in the build.csh file.
 ### cases/adapt
 
 The second change is in a separate repository. 
-https://github.com/davegill/wrf_feature_testing.
+https://github.com/wrf-model/wrf_feature_testing.
 The `cases` directory has the name of each of the required feature tests. 
 
 A new directory is added, with three files. The directory name, in this instance,
