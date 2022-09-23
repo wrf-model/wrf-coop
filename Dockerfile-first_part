@@ -1,15 +1,15 @@
 #
 FROM centos:7
-MAINTAINER Dave Gill <gill@ucar.edu>
+MAINTAINER Kelly Werner <kkeene@ucar.edu>
 
-ENV NML_VERSION 4.2
+ENV NML_VERSION 4.4
 
 # Set up base OS environment
 
 RUN yum -y update
 # Install SCL release package and python SCL
 RUN yum -y install centos-release-scl \
- && yum -y install --setopt=tsflags=nodocs rh-python36
+ && yum -y install --setopt=tsflags=nodocs rh-python38
 # Enable rh-python scl binary
 COPY entrypoint.sh /usr/bin/entrypoint.sh
 RUN chmod +x /usr/bin/entrypoint.sh
@@ -18,15 +18,15 @@ ENTRYPOINT [ "/usr/bin/entrypoint.sh" ]
 RUN yum -y install file gcc gcc-gfortran gcc-c++ glibc.i686 libgcc.i686 libpng-devel jasper \
   jasper-devel hostname m4 make perl tar bash tcsh time wget which zlib zlib-devel \
   openssh-clients openssh-server net-tools fontconfig libgfortran libXext libXrender \
-  sudo epel-release git flex flex-devel byacc
+  sudo epel-release git flex flex-devel byacc bzip2-devel gzip-devel
 
-# Newer version 9 of GNU compiler, required to fix WRF RRTMG-derivative builds
+# Install version 10 of GNU compiler
 
 RUN yum -y install centos-release-scl \
- && yum -y install devtoolset-9 \
- && yum -y install devtoolset-9-gcc devtoolset-9-gcc-gfortran devtoolset-9-gcc-c++ \
- && scl enable devtoolset-9 bash \
- && scl enable devtoolset-9 tcsh 
+ && yum -y install devtoolset-10 \
+ && yum -y install devtoolset-10-gcc devtoolset-10-gcc-gfortran devtoolset-10-gcc-c++ \
+ && scl enable devtoolset-10 bash \
+ && scl enable devtoolset-10 tcsh 
 
 RUN yum -y install php-devel php-pear
 RUN yum -y install ImageMagick ImageMagick-devel
@@ -42,7 +42,7 @@ ENV J 4
 
 # Build OpenMPI
 RUN mkdir -p /wrf/libs/openmpi/BUILD_DIR
-RUN source /opt/rh/devtoolset-9/enable \
+RUN source /opt/rh/devtoolset-10/enable \
  && cd /wrf/libs/openmpi/BUILD_DIR \
  && curl -L -O https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.0.tar.gz \
  && tar -xf openmpi-4.0.0.tar.gz \
@@ -58,15 +58,16 @@ RUN source /opt/rh/devtoolset-9/enable \
 
 # Build HDF5 libraries
 RUN mkdir -p /wrf/libs/hdf5/BUILD_DIR
-RUN source /opt/rh/devtoolset-9/enable \
+RUN source /opt/rh/devtoolset-10/enable \
  && cd /wrf/libs/hdf5/BUILD_DIR \
- && git clone https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git \
- && cd hdf5 \
- && git checkout hdf5-1_10_4 \
+ && wget https://www2.mmm.ucar.edu/people/duda/files/mpas/sources/hdf5-1.10.5.tar.bz2 \
+ && tar -xf hdf5-1.10.5.tar.bz2 \
+ && cd hdf5-1.10.5 \
  && ./configure --enable-fortran --enable-cxx --enable-shared --prefix=/usr/local/ &> /wrf/libs/build_log_hdf5_config \
  && echo dummy printout to keep travis happy hdf5 config \
  && make install &> /wrf/libs/build_log_hdf5_make \
  && echo dummy printout to keep travis happy hdf5 make \
+ && cd / \
  && rm -rf /wrf/libs/hdf5/BUILD_DIR
 ENV LD_LIBRARY_PATH /usr/local/lib
 
@@ -74,53 +75,63 @@ ENV LD_LIBRARY_PATH /usr/local/lib
 RUN yum -y install libcurl-devel zlib-devel
 ENV NETCDF /wrf/libs/netcdf
 RUN mkdir -p ${NETCDF}/BUILD_DIR
-RUN source /opt/rh/devtoolset-9/enable \
+RUN source /opt/rh/devtoolset-10/enable \
  && cd ${NETCDF}/BUILD_DIR \
- && curl -L -O https://github.com/Unidata/netcdf-c/archive/v4.6.2.tar.gz \
- && curl -L -O https://github.com/Unidata/netcdf-fortran/archive/v4.4.5.tar.gz \
+ && curl -L -O https://github.com/Unidata/netcdf-c/archive/refs/tags/v4.7.4.tar.gz \
+ && curl -L -O https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v4.6.0.tar.gz \
  && curl -L -O https://github.com/Unidata/netcdf4-python/archive/v1.5.3rel.tar.gz \
- && tar -xf v4.6.2.tar.gz \
- && cd netcdf-c-4.6.2 \
+ && tar -xf v4.7.4.tar.gz \
+ && cd netcdf-c-4.7.4 \
  && ./configure --enable-shared --prefix=${NETCDF} &> /wrf/libs/build_log_ncc_config \
  && echo dummy printout to keep travis happy ncc config \
  && make install &> /wrf/libs/build_log_ncc_make \
- && echo dummy printout to keep travis happy ncc make
+ && echo dummy printout to keep travis happy ncc make \
+ && cd /
 
 # Build netCDF Fortran libraries
-RUN source /opt/rh/devtoolset-9/enable \
+RUN source /opt/rh/devtoolset-10/enable \
  && env \
  && cd ${NETCDF}/BUILD_DIR \
- && tar -xf v4.4.5.tar.gz \
- && cd netcdf-fortran-4.4.5/ \
- && export LD_LIBRARY_PATH=${NETCDF}/lib:${LD_LIBRARY_PATH} \
+ && tar -xf v4.6.0.tar.gz \
+ && cd netcdf-fortran-4.6.0/ \
+ && export LD_LIBRARY_PATH=${NETCDF}/lib:/usr/local/lib:${LD_LIBRARY_PATH} \
  && CPPFLAGS=-I${NETCDF}/include LDFLAGS=-L${NETCDF}/lib ./configure --enable-shared --prefix=${NETCDF} &> /wrf/libs/build_log_ncf_config \
  && echo dummy printout to keep travis happy ncf config \
  && make install &> /wrf/libs/build_log_ncf_make \
- && echo dummy printout to keep travis happy ncf make
+ && echo dummy printout to keep travis happy ncf make \
+ && cd /
 
-# Setup up python3.6
-RUN yum -y install python36 \
- && yum -y install python36-devel \
- && yum -y install python36-pip \
- && yum -y install python36-setuptools \
- && easy_install-3.6 pip \
- && python3.6 -m pip install numpy \
- && python3.6 -m pip install --upgrade pip \
- && python3.6 -m pip install --upgrade setuptools
+# Install and setup Python3.8
+RUN yum -y groupinstall "Development Tools"
+RUN yum -y install openssl-devel bzip2-devel libffi-devel xz-devel
+RUN mkdir -p /wrf/libs/python/BUILD_DIR \
+  && cd /wrf/libs/python/BUILD_DIR \
+  && wget https://www.python.org/ftp/python/3.8.12/Python-3.8.12.tgz \
+  && tar -xf Python-3.8.12.tgz \
+  && cd Python-3.8.12 \
+  && ./configure --enable-optimizations --prefix=/usr/local  \
+  && make altinstall \
+  && cd / \
+  && rm -rf /wrf/libs/python/BUILD_DIR
+RUN python3.8 -m pip install numpy \
+ && python3.8 -m pip install --upgrade pip \
+ && python3.8 -m pip install --upgrade setuptools
 RUN ldconfig -v
 
 # Build netCDF4-python libraries
-RUN source /opt/rh/devtoolset-9/enable \
+RUN source /opt/rh/devtoolset-10/enable \
  && cd ${NETCDF}/BUILD_DIR \
  && tar -xf v1.5.3rel.tar.gz \
  && cd netcdf4-python-1.5.3rel/ \
  && export LD_LIBRARY_PATH=${NETCDF}/lib:${LD_LIBRARY_PATH} \
  && export NETCDF4_DIR=${NETCDF} \
  && export HDF5_DIR=/usr/local \
- && python3.6 -m pip install wheel \
- && python3.6 setup.py build \
- && CPPFLAGS="-I${NETCDF}/include -I/usr/local/include" LDFLAGS="-L${NETCDF}/lib -L/usr/local/lib" python3.6 setup.py install \
- && echo dummy printout to keep travis happy ncf4-python install
+ && python3.8 -m pip install wheel \
+ && python3.8 setup.py build \
+ && CPPFLAGS="-I${NETCDF}/include -I/usr/local/include" LDFLAGS="-L${NETCDF}/lib -L/usr/local/lib" python3.8 setup.py install \
+ && echo dummy printout to keep travis happy ncf4-python install \
+ && cd / \
+ && rm -rf ${NETCDF}/BUILD_DIR
 
 RUN mkdir -p /var/run/sshd \
     && ssh-keygen -A \
@@ -133,8 +144,7 @@ RUN mkdir -p  /wrf/WPS_GEOG /wrf/wrfinput /wrf/wrfoutput \
  &&  chmod 6755 /wrf /wrf/WPS_GEOG /wrf/wrfinput /wrf/wrfoutput /usr/local
 
 # Download NCL
-#https://www.earthsystemgrid.org/dataset/ncl.630.1.html
-RUN curl -SL https://www.earthsystemgrid.org/api/v1/dataset/ncl.630.1/file/ncl_ncarg-6.3.0.Linux_CentOS7.0_x86_64_nodap_gcc482.tar.gz | tar zxC /usr/local
+RUN curl -SL https://www.earthsystemgrid.org/api/v1/dataset/ncl.662.dap/file/ncl_ncarg-6.6.2-CentOS7.6_64bit_gnu485.tar.gz | tar zxC /usr/local 
 ENV NCARG_ROOT /usr/local
 
 # Set environment for interactive container shells
@@ -142,15 +152,17 @@ RUN echo export LDFLAGS="-lm" >> /etc/bashrc \
  && echo export NETCDF=${NETCDF} >> /etc/bashrc \
  && echo export JASPERINC=/usr/include/jasper/ >> /etc/bashrc \
  && echo export JASPERLIB=/usr/lib64/ >> /etc/bashrc \
- && echo export LD_LIBRARY_PATH="/opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9:/usr/lib64/openmpi/lib:${NETCDF}/lib:${LD_LIBRARY_PATH}" >> /etc/bashrc  \
- && echo export PATH=".:/opt/rh/devtoolset-9/root/usr/bin:/usr/lib64/openmpi/bin:${NETCDF}/bin:$PATH" >> /etc/bashrc
+ && echo export LD_LIBRARY_PATH="/opt/rh/devtoolset-10/root/usr/lib/gcc/aarch64-redhat-linux/10:/usr/lib64/openmpi/lib:${NETCDF}/lib:${LD_LIBRARY_PATH}" >> /etc/bashrc  \
+ && echo export PATH=".:/opt/rh/devtoolset-10/root/usr/bin:/usr/lib64/openmpi/bin:${NETCDF}/bin:$PATH" >> /etc/bashrc \
+ && echo export NCARG_ROOT=/usr/local >> /etc/bashrc
 
 RUN echo setenv LDFLAGS "-lm" >> /etc/csh.cshrc \
  && echo setenv NETCDF "${NETCDF}" >> /etc/csh.cshrc \
  && echo setenv JASPERINC "/usr/include/jasper/" >> /etc/csh.cshrc \
  && echo setenv JASPERLIB "/usr/lib64/" >> /etc/csh.cshrc \
- && echo setenv LD_LIBRARY_PATH "/opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9:/usr/lib64/openmpi/lib:${NETCDF}/lib:${LD_LIBRARY_PATH}" >> /etc/csh.cshrc \
- && echo setenv PATH ".:/opt/rh/devtoolset-9/root/usr/bin:/usr/lib64/openmpi/bin:${NETCDF}/bin:$PATH" >> /etc/csh.cshrc
+ && echo setenv LD_LIBRARY_PATH "/opt/rh/devtoolset-10/root/usr/lib/gcc/aarch64-redhat-linux/10:/usr/lib64/openmpi/lib:${NETCDF}/lib:${LD_LIBRARY_PATH}" >> /etc/csh.cshrc \
+ && echo setenv PATH ".:/opt/rh/devtoolset-10/root/usr/bin:/usr/lib64/openmpi/bin:${NETCDF}/bin:$PATH" >> /etc/csh.cshrc \
+ && echo setenv NCARG_ROOT /usr/local >> /etc/csh.cshrc
 
 RUN mkdir /wrf/.ssh ; echo "StrictHostKeyChecking no" > /wrf/.ssh/config
 COPY default-mca-params.conf /wrf/.openmpi/mca-params.conf
@@ -169,13 +181,12 @@ RUN if [ "$argname" = "tutorial" ] ; then curl -SL https://www2.mmm.ucar.edu/wrf
 RUN if [ "$argname" = "tutorial" ] ; then curl -SL https://www2.mmm.ucar.edu/wrf/src/namelists_v$NML_VERSION.tar.gz  | tar -xzC /wrf/wrfinput ; fi
 RUN if [ "$argname" = "tutorial" ] ; then curl -SL https://www2.mmm.ucar.edu/wrf/TUTORIAL_DATA/WRF_NCL_scripts.tar.gz | tar -xzC /wrf ; fi
 RUN if [ "$argname" = "regtest" ]  ; then curl -SL https://www2.mmm.ucar.edu/wrf/dave/data_smaller.tar.gz | tar -xzC /wrf ; fi
-RUN if [ "$argname" = "regtest" ]  ; then curl -SL https://www2.mmm.ucar.edu/wrf/dave/feature_data.tar.gz | tar -xzC /wrf ; fi
 
 ENV JASPERINC /usr/include/jasper
 ENV JASPERLIB /usr/lib64
 ENV NETCDF_classic 1
-ENV LD_LIBRARY_PATH /opt/rh/devtoolset-9/root/usr/lib/gcc/x86_64-redhat-linux/9:/usr/lib64/openmpi/lib:${NETCDF}/lib:${LD_LIBRARY_PATH}
-ENV PATH  .:/opt/rh/devtoolset-9/root/usr/bin:/usr/lib64/openmpi/bin:${NETCDF}/bin:$PATH
+ENV LD_LIBRARY_PATH /opt/rh/devtoolset-10/root/usr/lib/gcc/aarch64-redhat-linux/10:/usr/lib64/openmpi/lib:${NETCDF}/lib:${LD_LIBRARY_PATH}
+ENV PATH  .:/opt/rh/devtoolset-10/root/usr/bin:/usr/lib64/openmpi/bin:${NETCDF}/bin:$PATH
 
 RUN ssh-keygen -f /wrf/.ssh/id_rsa -t rsa -N '' \
     && chmod 600 /wrf/.ssh/config \

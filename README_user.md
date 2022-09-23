@@ -72,8 +72,8 @@ Several types of tests are accessible within this docker testing system.
 |ARW 2D hill         |     4     |   2D  |  yes   |        |     |   ideal    | N |
 
 2. The testing uses the WRF run-time configuration file, `namelist.input` to exercise an expandable list of features that are all included within the WRF docker container. The current list of tests conducted is produced from information within two github respositories:
-   * All available namelists choices for em_real: https://github.com/davegill/SCRIPTS/tree/master/Namelists/weekly/em_real/MPI
-   * Requested tests are defined in: https://github.com/davegill/wrf-coop/blob/regression+feature/build.csh
+   * All available namelists choices for em_real: https://github.com/wrf-model/SCRIPTS/tree/master/Namelists/weekly/em_real/MPI
+   * Requested tests are defined in: https://github.com/wrf-model/wrf-coop/blob/regression+feature/build.csh
 
 | **Test** | **MP** | **CU** | **LW** | **SW** | **PBL** | **SFC** | **LSM** | **URB** |
 | ------|:--:|:--:|:--:|:--:|:--: |:--: |:--: |:--: |
@@ -128,8 +128,8 @@ The topography for the nested domains over the central US for the 30/10-km ARW r
 Currrently all of the restart builds are for ARW em_real. Since the comparison is between the first (the full-length simulation) and the second (shorter, restart simulation) WRF runs, there is no need to try out different parallel options. The time period is 2016 Mar 23-24 0000 UTC, though again the simulations are very short: 12 minutes in duration.
 
 The testing uses groupings of three WRF run-time configuration files, `namelist.input.1`, `namelist.input.3`, and `namelist.input.3` to exercise an expandable list of features that are all included within the WRF docker container. The current list of tests conducted is produced from information within two githhub respositories:
-   * All available namelists choices for em_real: https://github.com/davegill/wrf_feature_testing/tree/main/cases
-   * Requested tests are defined in: https://github.com/davegill/wrf-coop/blob/regression+feature/build.csh
+   * All available namelists choices for em_real: https://github.com/wrf-model/wrf_feature_testing/tree/main/cases
+   * Requested tests are defined in: https://github.com/wrf-model/wrf-coop/blob/regression+feature/build.csh
 
 
 | **Test** | **SUITE** | **URB** | **DFI** |
@@ -152,7 +152,7 @@ The following describe the required steps run the WRF regression system on you l
 
 2. To start the process of constructing a working WRF docker container, clone the WRF-specific wrf-coop repository, and checkout the specific branch used by the automated testing. Once you have the docker application running on your machine, this repository contains the code that eventually builds the container structures for WRF.
 ```
-git clone https://github.com/davegill/wrf-coop
+git clone https://github.com/wrf-model/wrf-coop
 cd wrf-coop
 git checkout regression+feature
 ```
@@ -164,20 +164,20 @@ git checkout regression+feature
 Here is the entire Dockerfile for ARW: `Dockerfile`:
 ```
 #
-FROM davegill/wrf-coop:fifteenththtry
-MAINTAINER Dave Gill <gill@ucar.edu>
+FROM kkeene44/wrf-coop:version16
+MAINTAINER Kelly Werner <kkeene@ucar.edu>
 
 RUN git clone _FORK_/_REPO_.git WRF \
   && cd WRF \
   && git checkout _BRANCH_ \
   && cd ..
 
-RUN git clone https://github.com/davegill/SCRIPTS.git SCRIPTS \
+RUN git clone https://github.com/wrf-model/SCRIPTS.git SCRIPTS \
   && cp SCRIPTS/rd_l2_norm.py . && chmod 755 rd_l2_norm.py \
   && cp SCRIPTS/script.csh .    && chmod 755 script.csh    \
   && ln -sf SCRIPTS/Namelists . 
   
-RUN git clone https://github.com/davegill/wrf_feature_testing.git wrf_feature_testing \
+RUN git clone https://github.com/wrf-model/wrf_feature_testing.git wrf_feature_testing \
   && cd wrf_feature_testing && mv * .. && cd ..
 
 VOLUME /wrf
