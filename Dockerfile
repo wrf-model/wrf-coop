@@ -1,6 +1,6 @@
 #
-FROM davegill/wrf-coop:fifteenthtry
-MAINTAINER Dave Gill <gill@ucar.edu>
+FROM kkeene44/wrf-coop:version16
+MAINTAINER Kelly Werner <kkeene@ucar.edu>
 
 RUN git clone _FORK_/_REPO_.git WRF \
   && cd WRF \
