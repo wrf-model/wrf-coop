@@ -191,9 +191,9 @@ set SERIALBG  = ( F           F           F           F           F           F 
 set NP        = ( $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS        $PROCS      $PROCS      $PROCS         $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS      $PROCS                  ) # NP         
 set FEATURE   = ( FALSE       TRUE        FALSE       FALSE       FALSE       FALSE       FALSE       FALSE         FALSE       FALSE       FALSE          FALSE       FALSE       FALSE       FALSE       FALSE       FALSE       FALSE       FALSE       FALSE       FALSE       FALSE       FALSE                   ) # FEATURE    
 
-set SERIAL_OPT = 32
-set OPENMP_OPT = 33
-set    MPI_OPT = 34
+set SERIAL_OPT = 1 
+set OPENMP_OPT = 2
+set    MPI_OPT = 3
 
 #	Info to determine if we eventually accomplish what we originally intended.
 
