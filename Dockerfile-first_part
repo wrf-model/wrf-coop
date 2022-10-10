@@ -1,6 +1,6 @@
 #
-FROM centos:7
-MAINTAINER Dave Gill <gill@ucar.edu>
+FROM kkeene44/wrf-coop:version16
+MAINTAINER Kelly Werner <kkeene@ucar.edu>
 
 ENV NML_VERSION 4.2
 
