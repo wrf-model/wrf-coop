@@ -72,8 +72,8 @@ Several types of tests are accessible within this docker testing system.
 |ARW 2D hill         |     4     |   2D  |  yes   |        |     |   ideal    | N |
 
 2. The testing uses the WRF run-time configuration file, `namelist.input` to exercise an expandable list of features that are all included within the WRF docker container. The current list of tests conducted is produced from information within two github respositories:
-   * All available namelists choices for em_real: https://github.com/davegill/SCRIPTS/tree/master/Namelists/weekly/em_real/MPI
-   * Requested tests are defined in: https://github.com/davegill/wrf-coop/blob/regression+feature/build.csh
+   * All available namelists choices for em_real: https://github.com/wrf-model/SCRIPTS/tree/master/Namelists/weekly/em_real/MPI
+   * Requested tests are defined in: https://github.com/wrf-model/wrf-coop/blob/regression+feature/build.csh
 
 | **Test** | **MP** | **CU** | **LW** | **SW** | **PBL** | **SFC** | **LSM** | **URB** |
 | ------|:--:|:--:|:--:|:--:|:--: |:--: |:--: |:--: |
@@ -128,8 +128,8 @@ The topography for the nested domains over the central US for the 30/10-km ARW r
 Currrently all of the restart builds are for ARW em_real. Since the comparison is between the first (the full-length simulation) and the second (shorter, restart simulation) WRF runs, there is no need to try out different parallel options. The time period is 2016 Mar 23-24 0000 UTC, though again the simulations are very short: 12 minutes in duration.
 
 The testing uses groupings of three WRF run-time configuration files, `namelist.input.1`, `namelist.input.3`, and `namelist.input.3` to exercise an expandable list of features that are all included within the WRF docker container. The current list of tests conducted is produced from information within two githhub respositories:
-   * All available namelists choices for em_real: https://github.com/davegill/wrf_feature_testing/tree/main/cases
-   * Requested tests are defined in: https://github.com/davegill/wrf-coop/blob/regression+feature/build.csh
+   * All available namelists choices for em_real: https://github.com/wrf-model/wrf_feature_testing/tree/main/cases
+   * Requested tests are defined in: https://github.com/wrf-model/wrf-coop/blob/regression+feature/build.csh
 
 
 | **Test** | **SUITE** | **URB** | **DFI** |
@@ -152,7 +152,7 @@ The following describe the required steps run the WRF regression system on you l
 
 2. To start the process of constructing a working WRF docker container, clone the WRF-specific wrf-coop repository, and checkout the specific branch used by the automated testing. Once you have the docker application running on your machine, this repository contains the code that eventually builds the container structures for WRF.
 ```
-git clone https://github.com/davegill/wrf-coop
+git clone https://github.com/wrf-model/wrf-coop
 cd wrf-coop
 git checkout regression+feature
 ```
@@ -164,20 +164,20 @@ git checkout regression+feature
 Here is the entire Dockerfile for ARW: `Dockerfile`:
 ```
 #
-FROM davegill/wrf-coop:fifteenththtry
-MAINTAINER Dave Gill <gill@ucar.edu>
+FROM kkeene44/wrf-coop:version16
+MAINTAINER Kelly Werner <kkeene@ucar.edu>
 
 RUN git clone _FORK_/_REPO_.git WRF \
   && cd WRF \
   && git checkout _BRANCH_ \
   && cd ..
 
-RUN git clone https://github.com/davegill/SCRIPTS.git SCRIPTS \
+RUN git clone https://github.com/wrf-model/SCRIPTS.git SCRIPTS \
   && cp SCRIPTS/rd_l2_norm.py . && chmod 755 rd_l2_norm.py \
   && cp SCRIPTS/script.csh .    && chmod 755 script.csh    \
   && ln -sf SCRIPTS/Namelists . 
   
-RUN git clone https://github.com/davegill/wrf_feature_testing.git wrf_feature_testing \
+RUN git clone https://github.com/wrf-model/wrf_feature_testing.git wrf_feature_testing \
   && cd wrf_feature_testing && mv * .. && cd ..
 
 VOLUME /wrf
@@ -221,21 +221,21 @@ docker images
 
 REPOSITORY                    TAG                 IMAGE ID            CREATED             SIZE
 wrf-regtest                   latest              861fc54c4a6a        6 days ago          7.28 GB
-docker.io/davegill/wrf-coop   fifteenthtry        7991cdc121de        2 weeks ago         6.71 GB
+docker.io/kkeene44/wrf-coop  version16           7991cdc121de        2 weeks ago         6.71 GB
 ```
 
 ### Contruct the docker containers<a name="Constrcutcontainers"/>
 
 1. Choose a shared directory for docker
 
-To share data and files back and forth between the host OS and the docker container, a user-defined assignment maps a local host OS directory to a directory inside of the WRF container. For example, let's assume that the existing local directory on the host OS is `/users/gill/DOCKER_STUFF`.
+To share data and files back and forth between the host OS and the docker container, a user-defined assignment maps a local host OS directory to a directory inside of the WRF container. For example, let's assume that the existing local directory on the host OS is `/users/kkeene/DOCKER_STUFF`.
 
 2. Build the container 
 
 Each container takes about 30 seconds to complete (nothing to download, just local processing). The commands for each container should each be issued from separate terminal windows from the host OS (i.e. don't issue a docker command inside of a WRF docker container).
 
 ```
-docker run -it --name ARW -v /users/gill/DOCKER_STUFF:/wrf/wrfoutput wrf_regtest /bin/tcsh
+docker run -it --name ARW -v /users/kkeene/DOCKER_STUFF:/wrf/wrfoutput wrf_regtest /bin/tcsh
 ```
 You are now in the ARW container. You'll notice that the prompt has changed:
 ```
@@ -337,10 +337,10 @@ cp wrfout_d01_2000-01-24_12:00:00 /wrf/wrfoutput/
 
 In the host OS, go to the shared volume directory:
 ```
-cd /users/gill/DOCKER_STUFF
+cd /users/kkeene/DOCKER_STUFF
 ls -ls
 total 78936
-78936 -rw-r--r--  1 gill  1500  40413808 Apr  3 14:19 wrfout_d01_2000-01-24_12:00:00
+78936 -rw-r--r--  1 kkeene  1500  40413808 Apr  3 14:19 wrfout_d01_2000-01-24_12:00:00
 ```
 ### Compare the simulation results<a name="Compareresults"/>
 
@@ -1042,7 +1042,7 @@ What docker images are available to remove:
 docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED              SIZE
 wrf_regtest         latest              cb75a489c00c        About a minute ago   5.67 GB
-davegill/wrf-coop   fifteenthtry        c06fd248f249        6 hours ago          5.21 GB
+kkeene44/wrf-coop   version16           c06fd248f249        6 hours ago          5.21 GB
 ```
 As mentioned previously, leave the `wrf-coop` images alone. To remove the image that made the `ARW` container (in the above example):
 ```

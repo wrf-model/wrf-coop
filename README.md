@@ -5,46 +5,16 @@ Build a container without WRF, then use that to build a container with WRF.
 It takes too long to always rebuild the container with WRF from scratch.
 
 ### Build first image 
-As of December 2019, this build / tag / push sequence must take place on a Linux machine. When trying to run this on a Mac, after 45 minutes of build time, you get:
+This build / tag / push sequence must take place on a Linux machine. When trying to run this on a Mac, after 45 minutes of build time, you get:
 ```
-etotheipi> docker push davegill/wrf-coop
-The push refers to repository [docker.io/davegill/wrf-coop]
+> docker push kkeene44/wrf-coop
+The push refers to repository [docker.io/kkeene44/wrf-coop]
 1c01cbaea4b8: Preparing 
-96dd30e2d9ec: Preparing 
-dbd99cfb48e8: Preparing 
-d2077632857f: Preparing 
-336a0a4ad4f4: Preparing 
+..
+..
 cc575835f8d4: Waiting 
-8844f6dd5393: Waiting 
-ef3923c49da1: Waiting 
-c57ce027abec: Waiting 
-d95b9b793e55: Waiting 
-d3d99b43d791: Waiting 
-987b6f729113: Waiting 
-aaf171c968f9: Waiting 
-38ae20a05bbf: Waiting 
-00cb8d467c5a: Waiting 
-9e8f7cbd1249: Waiting 
-d9767a7f89ec: Waiting 
-3e5c4dab6989: Waiting 
-d6304121d9e9: Waiting 
-2d3c96b16c25: Waiting 
-5239d65fffbc: Waiting 
-efb9e1f528df: Waiting 
-56c191e44487: Waiting 
-5dc1f34a4acf: Waiting 
-25c575725839: Waiting 
-d3709005b6e6: Waiting 
-1b5810566615: Waiting 
-217b19599265: Waiting 
-0e0618c626be: Waiting 
-2f6eb8fce98a: Waiting 
-cfd9822dfbcf: Waiting 
-a4cf543cbf0f: Waiting 
-bdc7e8c79d1f: Waiting 
-9c8f4f160f2a: Waiting 
-913a6c3d7109: Waiting 
-77b174a6a187: Waiting 
+..
+..
 denied: requested access to the resource is denied
 ```
 This image has the libs, data, directory structure, etc inside. The construction of this image uses the `Dockerfile-first_part` from this repository. This Docker setup was tested at https://github.com/davegill/travis_test. In the docker branch of the travis_test repo are the original `Dockerfile-template` and the `.travis.yml` files.
@@ -63,12 +33,12 @@ wrf-coop            latest              bd2082d1eb7d        19 minutes ago      
 centos              latest              9f38484d220f        5 weeks ago         202MB
 ```
 
-Once we have that image, we want to save it. That is the _WHOLE_ purpose of this exercise. Then we just pull it down and add in the WRF repository, and voi-fricking-la. Note, this is `firsttry`. I am at `fifteenthtry`.
+Once we have that image, we want to save it. That is the _WHOLE_ purpose of this exercise. Then we just pull it down and add in the WRF repository, and voi-fricking-la. 
 ```
-> docker tag bd2082d1eb7d davegill/wrf-coop:firsttry
+> docker tag bd2082d1eb7d kkeene44/wrf-coop:version16
 
-> docker push davegill/wrf-coop
-The push refers to repository [docker.io/davegill/wrf-coop]
+> docker push kkeene44/wrf-coop
+The push refers to repository [docker.io/kkeene44/wrf-coop]
 558695d708da: Pushed 
 e2d555398d6f: Pushed 
 8c6b7d91fee6: Pushed 
@@ -162,7 +132,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 > docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 wrf_regtest         latest              cb75a489c00c        About a minute ago   5.67 GB
-davegill/wrf-coop   fifteenthtry        c06fd248f249        6 hours ago          5.21 GB
+kkeene44/wrf-coop   version16           c06fd248f249        6 hours ago          5.21 GB
 ```
 ```
 > docker rmi 196313365c17 efc665da99ef
@@ -264,11 +234,11 @@ Each manufactured job script looks similar to this:
 ```
 #!/bin/csh
 #####################   TOP OF JOB    #####################
-touch /classroom/dave/wrf-coop/DOING_NOW_test_003s
-chmod 666 /classroom/dave/wrf-coop/DOING_NOW_test_003s
+touch /User/kkeene/wrf-coop/DOING_NOW_test_003s
+chmod 666 /User/kkeene/wrf-coop/DOING_NOW_test_003s
 echo TEST CASE = test_003s
 date
-set SHARED = /classroom/dave/wrf-coop
+set SHARED = /User/kkeene/wrf-coop
 #	Build: case = em, SERIAL
 echo Build container
 #docker run -it --name test_003s  -v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest /bin/tcsh
@@ -320,9 +290,9 @@ docker stop test_003s
 date
 docker rm test_003s
 date
-touch /classroom/dave/wrf-coop/COMPLETE_test_003s
-chmod 666 /classroom/dave/wrf-coop/COMPLETE_test_003s
-mv /classroom/dave/wrf-coop/DOING_NOW_test_003s /classroom/dave/wrf-coop/COMPLETE_test_003s
+touch /User/kkeene/wrf-coop/COMPLETE_test_003s
+chmod 666 /User/kkeene/wrf-coop/COMPLETE_test_003s
+mv /User/kkeene/wrf-coop/DOING_NOW_test_003s /User/kkeene/wrf-coop/COMPLETE_test_003s
 #####################   END OF JOB    #####################
 ```
 

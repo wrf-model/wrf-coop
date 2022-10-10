@@ -355,7 +355,7 @@ echo "#	container, and then does some seasonal pruning" >> single_end.csh
 echo "" >> single_end.csh
 echo "date" >> single_end.csh
 echo 'docker rmi $1' >> single_end.csh
-echo "set hash = "'`'"docker images | grep davegill |  awk '{print  " '$3' "}'" ' `' >> single_end.csh
+echo "set hash = "'`'"docker images | grep kkeene44 |  awk '{print  " '$3' "}'" ' `' >> single_end.csh
 echo '#docker rmi --force $hash' >> single_end.csh
 echo "docker volume prune -f" >> single_end.csh
 echo "docker system df" >> single_end.csh
