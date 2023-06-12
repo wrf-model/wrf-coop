@@ -21,13 +21,13 @@ When the initial keyword is `BUILD`, the script expects four mandatory entries: 
 
 `nest_opt` : When issuing the `./configure` commmand inside the WRF system, this is the type of nest that is selected. Most of the time, the value `1` is sufficient. A moving nest case requires `3`, while an idealized 2d case requires a no-nest build `0`.
 
-`build_opt`: When issuing the `./compile` command, the `build_opt` is the target, such as `em_real`, or `em_b_wave`, or `nmm_real`.
+`build_opt`: When issuing the `./compile` command, the `build_opt` is the target, such as `em_real`, or `em_b_wave`.
 
 ##### OPTIONAL ##### 
 
 The `conf_opt` values are the options that are fed to the `./configure` script. Examples include `-d`, `-D`, `-r8`. All of these options MUST begin with a dash character `-`.
 
-The `env_var=val` options are environment variables that are required to be set prior to the build of the WRF system. These are typically used in concert with the `build_opt` setting. For example `em_real` would build a traditional WRF model, but `em_real` and the environment variable `WRF_CHEM=1` would build a WRF Chem model. Another example: `nmm_real` requires `WRF_NMM_CORE=1`. No spaces or quotes are permitted in the environment settings. Use the at, @, symbol to denote a space. For example, to tell the Makefile to build with up to three parallel build processes, `J=-j@1`. All of these environment settings must include an equal sign `=`.
+The `env_var=val` options are environment variables that are required to be set prior to the build of the WRF system. These are typically used in concert with the `build_opt` setting. For example `em_real` would build a traditional WRF model, but `em_real` and the environment variable `WRF_CHEM=1` would build a WRF Chem model. No spaces or quotes are permitted in the environment settings. Use the at, @, symbol to denote a space. For example, to tell the Makefile to build with up to three parallel build processes, `J=-j@1`. All of these environment settings must include an equal sign `=`.
 
 
 #### RUN ####
@@ -65,5 +65,4 @@ The `env_var=val` options are environment variables that are required to be set 
 | em_quarter_ss8  | em_quarter_ss   | 32, 33, 34 | 02 03 04 05 06 08 09 10 |
 | em_real         | em_real         | 32, 33, 34 | 01 01ST 02 02GR 02ST 03 03DF 03FD 03ST 03VN 04FD 05 05AD 05ST 06 06BN 06VN 07 07NE 07VN 08 09 09QT 10 10VN 11 12 12GR 13 14 14VN 15 15AD 16 16BN 16DF 16VN 17 17AD 17VN 18 18BN 18VN 19 20 20NE 20VN 21 25 26 29 29QT 30 31 31AD 31VN 32 33 34 35 37 38 38AD 38VN 39 39AD 40 41 42 42VN 43 48 48VN 49 49VN 50 50VN 51 52 52DF 52FD 52VN 54 55FD 56 56NE 56VN 57 57NE 58 58NE 60 60NE 61 61NE 62 63 64 64FD 64VN 65DF 66FD 67 67NE 68 68NE 69 70 71 72 73 74 75 76 76NE 77 77NE 78 global |
 | em_real8        | em_real         | 32, 33, 34 | 07 14 16 17 17AD 18 31 31AD 38 74 75 76 77 78 |
-| nmm_nest        | nmm_real        | 32,     34 | 02 08 09 12 13 14 |
 

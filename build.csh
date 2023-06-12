@@ -72,7 +72,6 @@ if      ( $TEST_GEN == ALL ) then
 	                  "em_realG       kiaps1NE kiaps2 rala ralbNE " \
 	                  "em_realH       cmt fsbm solaraNE solarb urb3aNE urb3bNE " \
 	                  "em_chem_kpp    101 107 120 201 " \
-	                  "nmm_hwrf       1NE 2NE 3NE 4 " \
 	                )
 
 else if ( $TEST_GEN == SOME ) then
@@ -97,7 +96,6 @@ else if ( $TEST_GEN == SOME ) then
 	                  "em_realG       kiaps1NE kiaps2 " \
 	                  "em_realH       cmt solaraNE urb3bNE " \
 	                  "em_chem_kpp    120 " \
-	                  "nmm_hwrf       1NE 2NE 3NE " \
 	                )
 
 else if ( $TEST_GEN == test ) then
@@ -124,7 +122,6 @@ else if ( $TEST_GEN == test ) then
 	                  "em_realG       cmt    " \
 	                  "em_realH       fsbm   " \
 	                  "em_chem_kpp    120 " \
-	                  "nmm_hwrf       1NE    " \
 	                )
 
 	set TEST      = ( \
@@ -146,7 +143,6 @@ else if ( $TEST_GEN == test ) then
 	                  "em_realG       cmt    " \
 	                  "em_realH       fsbm   " \
 	                  "em_chem_kpp    120 " \
-	                  "nmm_hwrf       1NE    " \
 	                )
 
 endif
@@ -158,11 +154,11 @@ set OPENMP    = ( T           F           T             T           T           
 set MPI       = ( T           T           T             T           T           T              T           T           F           T           T           T           T           T           T           T           T           T                       T              )
 set NEST      = ( 1           1           1             1           1           1              3           1           0           1           1           1           1           1           1           1           1           1                       3              )
 set NAME      = ( em          chem        qss           bwave       real8       qss8           move        fire        hill        em          em          em          em          em          em          em          em          kpp                     hwrf           )
-set COMPILE   = ( em_real     em_real     em_quarter_ss em_b_wave   em_real     em_quarter_ss  em_real     em_fire     em_hill2d_x em_real     em_real     em_real     em_real     em_real     em_real     em_real     em_real     em_real                 nmm_real       )
-set RUNDIR    = ( em_real     em_chem     em_quarter_ss em_b_wave   em_real8    em_quarter_ss8 em_move     em_fire     em_hill2d_x em_realA    em_realB    em_realC    em_realD    em_realE    em_realF    em_realG    em_realH    em_chem_kpp             nmm_hwrf       )
+set COMPILE   = ( em_real     em_real     em_quarter_ss em_b_wave   em_real     em_quarter_ss  em_real     em_fire     em_hill2d_x em_real     em_real     em_real     em_real     em_real     em_real     em_real     em_real     em_real                                )
+set RUNDIR    = ( em_real     em_chem     em_quarter_ss em_b_wave   em_real8    em_quarter_ss8 em_move     em_fire     em_hill2d_x em_realA    em_realB    em_realC    em_realD    em_realE    em_realF    em_realG    em_realH    em_chem_kpp                            )
 set DASHOPT1  = ( -d          -d          -d            -d          -d          -d             -d          -d          -d          -d          -d          -d          -d          -d          -d          -d          -d          -d                      -d             )
 set DASHOPT2  = ( F           F           F             F           -r8         -r8            F           F           F           F           F           F           F           F           F           F           F           F                       F              )
-set BUILDENV1 = ( F           WRF_CHEM=1  F             F           F           F              F           F           F           F           F           F           F           F           F           F           F           WRF_CHEM=1              WRF_NMM_CORE=1 )
+set BUILDENV1 = ( F           WRF_CHEM=1  F             F           F           F              F           F           F           F           F           F           F           F           F           F           F           WRF_CHEM=1                             )
 set BUILDENV2 = ( J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS   J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS    J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS J=-j@$PROCS             J=-j@$PROCS    )
 set BUILDENV3 = ( F           F           F             F           F           F              F           F           F           F           F           F           F           F           F           F           F           WRF_KPP=1               HWRF=1         )
 set BUILDENV4 = ( F           F           F             F           F           F              F           F           F           F           F           F           F           F           F           F           F           FLEX_LIB_DIR=/usr/lib64 F              )
@@ -284,7 +280,6 @@ echo "#	This script builds the docker image for the rest of the testing harness 
 echo "" >> single_init.csh
 echo "#	The mandatory input argument is the name of the Dockerfile" >> single_init.csh
 echo '#	If the name is "Dockerfile", the ARW code is run' >> single_init.csh
-echo '#	If the name is "Dockerfile-NMM", the HWRF code is run' >> single_init.csh
 echo "" >> single_init.csh
 echo "date" >> single_init.csh
 echo "set SHARED = $SHARED" >> single_init.csh
@@ -310,8 +305,6 @@ echo "	cp -pr ${DROPIT}/Namelists ." >> single_init.csh
 echo "	tar -cf nml.tar Namelists" >> single_init.csh
 echo "	sed -e 's/#ADD/ADD/' Dockerfile > .foo" >> single_init.csh
 echo "	mv .foo Dockerfile" >> single_init.csh
-echo "	sed -e 's/#ADD/ADD/' Dockerfile-NMM > .foo" >> single_init.csh
-echo "	mv .foo Dockerfile-NMM" >> single_init.csh
 echo "endif" >> single_init.csh
 echo "" >> single_init.csh
 echo '#	-f $1 = name of the Dockerfile' >> single_init.csh
@@ -391,17 +384,10 @@ foreach n ( $NUMBER )
 				echo '	if ( $TCOUNT == 1 ) ' "goto aSKIP_test_0${n}${test_suffix}" >> $fname
 				echo "	date" >> $fname
 				echo "	echo Build container for" '$test' >> $fname
-				if ( $n == 19 ) then
-					echo "	#docker run -it --name" '$test -v $SHARED/OUTPUT:/wrf/wrfoutput wrf_nmmregtest /bin/tcsh' >> $fname
-					echo "	#docker exec -it " '$test /bin/tcsh' >> $fname
-					echo "	#docker start -ai " '$test' >> $fname
-					echo "	docker run -d -t --name" '$test -v $SHARED/OUTPUT:/wrf/wrfoutput wrf_nmmregtest' >> $fname
-				else
-					echo "	#docker run -it --name" '$test -v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest /bin/tcsh' >> $fname
-					echo "	#docker exec -it " '$test /bin/tcsh' >> $fname
-					echo "	#docker start -ai " '$test' >> $fname
-					echo "	docker run -d -t --name" '$test -v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest' >> $fname
-				endif
+				echo "	#docker run -it --name" '$test -v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest /bin/tcsh' >> $fname
+				echo "	#docker exec -it " '$test /bin/tcsh' >> $fname
+				echo "	#docker start -ai " '$test' >> $fname
+				echo "	docker run -d -t --name" '$test -v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest' >> $fname
 				echo "	date" >> $fname
 				echo "	echo Build WRF executable for" '$test' >> $fname
 				echo "	( $string"' ) &' >> $fname
@@ -439,10 +425,7 @@ foreach n ( $NUMBER )
 
 				echo "	docker exec" '$test ls -ls WRF/main/wrf.exe' >> $fname
 				echo '	set OK_WRF = $status' >> $fname
-				if      ( $COMPILE[$COUNT] == nmm_real ) then
-					echo "	docker exec" '$test ls -ls WRF/main/real_nmm.exe' >> $fname
-					echo '	set OK_PRE = $status' >> $fname
-				else if ( $COMPILE[$COUNT] == em_real ) then
+				if ( $COMPILE[$COUNT] == em_real ) then
 					echo "	docker exec" '$test ls -ls WRF/main/real.exe' >> $fname
 					echo '	set OK_PRE = $status' >> $fname
 				else
@@ -527,27 +510,17 @@ foreach n ( $NUMBER )
 				set string = ( $string $str )
 
 				echo "echo Build container" >> $fname
-				if ( $n == 19 ) then
-					echo "#docker run -it --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_nmmregtest /bin/tcsh' >> $fname
-					echo "#docker exec -it test_0${n}${test_suffix} /bin/tcsh" >> $fname
-					echo "#docker start -ai test_0${n}${test_suffix}" >> $fname
-					echo "docker run -d -t --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_nmmregtest' >> $fname
-				else
-					echo "#docker run -it --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest /bin/tcsh' >> $fname
-					echo "#docker exec -it test_0${n}${test_suffix} /bin/tcsh" >> $fname
-					echo "#docker start -ai test_0${n}${test_suffix}" >> $fname
-					echo "docker run -d -t --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest' >> $fname
-				endif
+				echo "#docker run -it --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest /bin/tcsh' >> $fname
+				echo "#docker exec -it test_0${n}${test_suffix} /bin/tcsh" >> $fname
+				echo "#docker start -ai test_0${n}${test_suffix}" >> $fname
+				echo "docker run -d -t --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest' >> $fname
 				echo "date" >> $fname
 				echo "echo Build WRF executable" >> $fname
 				echo $string >> $fname
 				echo "date" >> $fname
 				echo "docker exec test_0${n}${test_suffix} ls -ls WRF/main/wrf.exe" >> $fname
 				echo 'set OK_WRF = $status' >> $fname
-				if      ( $COMPILE[$COUNT] == nmm_real ) then
-					echo "docker exec test_0${n}${test_suffix} ls -ls WRF/main/real_nmm.exe" >> $fname
-					echo 'set OK_PRE = $status' >> $fname
-				else if ( $COMPILE[$COUNT] == em_real ) then
+				if ( $COMPILE[$COUNT] == em_real ) then
 					echo "docker exec test_0${n}${test_suffix} ls -ls WRF/main/real.exe" >> $fname
 					echo 'set OK_PRE = $status' >> $fname
 				else
@@ -655,27 +628,17 @@ foreach n ( $NUMBER )
 				set string = ( $string $str )
 
 				echo "echo Build container" >> $fname
-				if ( $n == 19 ) then
-					echo "#docker run -it --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_nmmregtest /bin/tcsh' >> $fname
-					echo "#docker exec -it test_0${n}${test_suffix} /bin/tcsh" >> $fname
-					echo "#docker start -ai test_0${n}${test_suffix}" >> $fname
-					echo "docker run -d -t --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_nmmregtest' >> $fname
-				else
-					echo "#docker run -it --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest /bin/tcsh' >> $fname
-					echo "#docker exec -it test_0${n}${test_suffix} /bin/tcsh" >> $fname
-					echo "#docker start -ai test_0${n}${test_suffix}" >> $fname
-					echo "docker run -d -t --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest' >> $fname
-				endif
+				echo "#docker run -it --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest /bin/tcsh' >> $fname
+				echo "#docker exec -it test_0${n}${test_suffix} /bin/tcsh" >> $fname
+				echo "#docker start -ai test_0${n}${test_suffix}" >> $fname
+				echo "docker run -d -t --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest' >> $fname
 				echo "date" >> $fname
 				echo "echo Build WRF executable" >> $fname
 				echo $string >> $fname
 				echo "date" >> $fname
 				echo "docker exec test_0${n}${test_suffix} ls -ls WRF/main/wrf.exe" >> $fname
 				echo 'set OK_WRF = $status' >> $fname
-				if      ( $COMPILE[$COUNT] == nmm_real ) then
-					echo "docker exec test_0${n}${test_suffix} ls -ls WRF/main/real_nmm.exe" >> $fname
-					echo 'set OK_PRE = $status' >> $fname
-				else if ( $COMPILE[$COUNT] == em_real ) then
+				if ( $COMPILE[$COUNT] == em_real ) then
 					echo "docker exec test_0${n}${test_suffix} ls -ls WRF/main/real.exe" >> $fname
 					echo 'set OK_PRE = $status' >> $fname
 				else
@@ -783,27 +746,17 @@ foreach n ( $NUMBER )
 				set string = ( $string $str )
 
 				echo "echo Build container" >> $fname
-				if ( $n == 19 ) then
-					echo "#docker run -it --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_nmmregtest /bin/tcsh' >> $fname
-					echo "#docker exec -it test_0${n}${test_suffix} /bin/tcsh" >> $fname
-					echo "#docker start -ai test_0${n}${test_suffix}" >> $fname
-					echo "docker run -d -t --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_nmmregtest' >> $fname
-				else
-					echo "#docker run -it --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest /bin/tcsh' >> $fname
-					echo "#docker exec -it test_0${n}${test_suffix} /bin/tcsh" >> $fname
-					echo "#docker start -ai test_0${n}${test_suffix}" >> $fname
-					echo "docker run -d -t --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest' >> $fname
-				endif
+				echo "#docker run -it --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest /bin/tcsh' >> $fname
+				echo "#docker exec -it test_0${n}${test_suffix} /bin/tcsh" >> $fname
+				echo "#docker start -ai test_0${n}${test_suffix}" >> $fname
+				echo "docker run -d -t --name test_0${n}${test_suffix} " '-v $SHARED/OUTPUT:/wrf/wrfoutput wrf_regtest' >> $fname
 				echo "date" >> $fname
 				echo "echo Build WRF executable" >> $fname
 				echo $string >> $fname
 				echo "date" >> $fname
 				echo "docker exec test_0${n}${test_suffix} ls -ls WRF/main/wrf.exe" >> $fname
 				echo 'set OK_WRF = $status' >> $fname
-				if      ( $COMPILE[$COUNT] == nmm_real ) then
-					echo "docker exec test_0${n}${test_suffix} ls -ls WRF/main/real_nmm.exe" >> $fname
-					echo 'set OK_PRE = $status' >> $fname
-				else if ( $COMPILE[$COUNT] == em_real ) then
+				if ( $COMPILE[$COUNT] == em_real ) then
 					echo "docker exec test_0${n}${test_suffix} ls -ls WRF/main/real.exe" >> $fname
 					echo 'set OK_PRE = $status' >> $fname
 				else
