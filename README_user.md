@@ -5,14 +5,13 @@
 * [What is tested](#Tested)
 * [Get the WRF docker infrastructure](#Getdocker)
 * [Prepare the docker image](#Prepareimage)
-* [Contruct the docker containers](#Constrcutcontainers)
+* [Contruct the docker container](#Constrcutcontainer)
 * [Build executables from source, run tests](#Buildexec)
     * [Run a sample test case](#Runsample)
     * [Check the simulation results](#Checkresults)
     * [Compare the simulation results](#Compareresults)
     * [Checking WRF Chem results](#WRFChem)
     * [Checking WRF DA results](#WRFDA)
-    * [Checking NMM results](#WRFNMM)
 * [Docker Clean Up](#Cleanup)
     * [Stop, re-enter, and remove a docker container](#Stop) 
 * [Remove a docker image](#RemoveImage)
@@ -37,13 +36,13 @@ to submission, and it is the proposing developer’s responsibility to perform
 all required positive and negative testing.  The developer must ensure that the proposed change
 _does_ work as described, and importantly that the modification _does not_ accidentally impact other parts of the model.  
 
-This page describes how to use docker containers for both the positive tests (activated option must perform as expected) and negative tests (no unintended consequences) of code proposed to WRF. This document provides developers with simple instructions to allow them to more fully vet their code by providing data and configuration files for a wide variety of known working setups. Before issuing a pull request to the WRF github repository, the developer's code modification must demonstrate the continued proper functioning of these existing WRF capabilities.
+This page describes how to use a docker container for both the positive tests (activated option must perform as expected) and negative tests (no unintended consequences) of code proposed to WRF. This document provides developers with simple instructions to allow them to more fully vet their code by providing data and configuration files for a wide variety of known working setups. Before issuing a pull request to the WRF github repository, the developer's code modification must demonstrate the continued proper functioning of these existing WRF capabilities.
 
 ### What is tested<a name="Tested"/>
 
-The real-data ARW simulations are tested for the 2000 Jan 24-25 1200 UTC case (though typically for only the first half hour of the time period). 
+The real-data WRF-ARW simulations are tested for the 2000 Jan 24-25 1200 UTC case (though typically for only the first half hour of the time period). 
 
-The domain for the ARW real-data simulations is shown in the figure.
+The domain for the WRF-ARW real-data simulations is shown in the figure.
 ![Screen Shot 2020-04-06 at 10 52 27 AM](https://user-images.githubusercontent.com/12666234/78584017-d5263d00-77f4-11ea-89b3-54cdf8357090.png)
 
 Several types of tests are accessible within this docker testing system.
@@ -53,7 +52,6 @@ Several types of tests are accessible within this docker testing system.
 |  Build Type        | Precision | 3D/2D | SERIAL | OPENMP | MPI | Ideal/Real | Nested |
 | ------------------ |:---------:|:-----:|:------:|:------:|:---:|:----------:|:--:|
 |ARW em_real         |  4 and 8  |   3D  |  yes   | yes    | yes |    real    | Y |
-|NMM HWRF            |     4     |   3D  |        |        | yes |    real    | Y |
 |ARW chemistry       |     4     |   3D  |  yes   |        | yes |    real    | N |
 |ARW super cell      |  4 and 8  |   3D  |  yes   | yes    | yes |   ideal    | Y |
 |ARW baroclinic wave |     4     |   3D  |  yes   | yes    | yes |   ideal    | Y |
@@ -124,9 +122,9 @@ cd wrf-coop
 
 ## Prepare the docker image<a name="Prepareimage"/>
 
-1. From inside the top-level `wrf-coop` directory, edit the runtime files for docker to test the single specific WRF fork, repository, and branch: `Dockerfile` and `Dockerfile-NMM`. 
+1. From inside the top-level `wrf-coop` directory, edit the runtime files for docker to test the single specific WRF fork, repository, and branch: `Dockerfile`. 
 
-Here is the entire Dockerfile for ARW: `Dockerfile`:
+Here is the entire Dockerfile for WRF-ARW: `Dockerfile`:
 ```
 #
 FROM davegill/wrf-coop:fourteenthtry
@@ -146,27 +144,7 @@ VOLUME /wrf
 CMD ["/bin/tcsh"]
 ```
 
-Here is the entire Dockerfile for NMM: `Dockerfile-NMM`:
-```
-#
-FROM davegill/wrf-coop:sixthtry
-MAINTAINER Dave Gill <gill@ucar.edu>
-
-RUN git clone _FORK_/_REPO_.git WRF \
-  && cd WRF \
-  && git checkout _BRANCH_ \
-  && cd ..
-
-RUN git clone https://github.com/davegill/SCRIPTS.git SCRIPTS \
-  && cp SCRIPTS/rd_l2_norm.py . && chmod 755 rd_l2_norm.py \
-  && cp SCRIPTS/script.csh .    && chmod 755 script.csh    \
-  && ln -sf SCRIPTS/Namelists . 
-
-VOLUME /wrf
-CMD ["/bin/tcsh"]
-```
-
-What needs to be modified in both files is the location of the WRF repository to test. Look for the section (in both files) that has:
+Modify the location of the WRF repository to test. Look for the section that has:
 ```
 RUN git clone _FORK_/_REPO_.git WRF \
   && cd WRF \
@@ -179,7 +157,7 @@ For example, replacing those italicized names (including the leading and closing
 *\_REPO\_* => `WRF`   
 *\_BRANCH\_* => `irr=3`   
 
-would yield the same final text to be used within both `Dockerfile` and `Dockerfile-NMM`.
+would yield the same final text to be used within `Dockerfile`. 
 ```
 RUN git clone https://github.com/davegill/WRF.git WRF \
   && cd WRF \
@@ -191,53 +169,44 @@ Please note that some people have their repository name as `WRF-1` (instead of t
 
 2. Construct the docker image
 
-Using the `Dockerfile` and the `Dockerfile-NMM`, build two docker images. Note that there are indeed periods at the trailing ends of these commands!
+Using the `Dockerfile`, build a docker image. Note that there are indeed periods at the trailing ends of these commands!
 
 ```
 docker build -t wrf_regtest .
-docker build -f Dockerfile-NMM -t wrf_nmmregtest .
 ```
 
-You have to be in the directory where the Dockerfiles are located (or else use the `-f` option). Each of the two commands takes about 5 minutes to complete (downloading several GB of data and code). Afterwards, there are two docker images (`wrf_regtest` and `wrf_nmmregtest`) that can be used to build your WRF containers. The images that include the name `wrf-coop` are the public dockerhub pieces that include Linux, the compiler, user libraries (such as netcdf and mpi), user executables (again such as from netcdf and mpi), and directory structure for the WRF model. These preparatory images are not used directly by users.
+You have to be in the directory where the Dockerfile is located (or else use the `-f` option). The command takes about 5 minutes to complete (downloading several GB of data and code). Afterwards, the docker image `wrf_regtest` can be used to build your WRF container. The images that include the name `wrf-coop` are the public dockerhub pieces that include Linux, the compiler, user libraries (such as netcdf and mpi), user executables (again such as from netcdf and mpi), and directory structure for the WRF model. These preparatory images are not used directly by users.
 ```
 docker images
 
 REPOSITORY          TAG                 IMAGE ID            CREATED              SIZE
-wrf_nmmregtest      latest              13b80465a2f4        2 days ago           5.78GB
 wrf_regtest         latest              cb75a489c00c        About a minute ago   5.67 GB
 davegill/wrf-coop   fourteenthtry       41a5030914ca        10 minutes ago       5.55 GB
-davegill/wrf-coop   sixthtry            c36f5f2b0cc6        3 months ago         5.32GB
 ```
 
-## Contruct the docker containers<a name="Constrcutcontainers"/>
+## Contruct the docker container<a name="Constrcutcontainer"/>
 
 1. Choose a shared directory for docker
 
 To share data and files back and forth between the host OS and the docker container, a user-defined assignment maps a local host OS directory to a directory inside of the WRF container. For example, let's assume that the existing local directory on the host OS is `/users/gill/DOCKER_STUFF`.
 
-2. Build the containers 
+2. Build the container 
 
-Each of these take about 30 seconds to complete (nothing to download, just local processing). These commands should each be issued from separate terminal windows from the host OS (i.e. don't issue a docker command inside of a WRF docker container).
+This takes about 30 seconds to complete (nothing to download, just local processing). This command should be issued from a separate terminal window from the host OS (i.e. don't issue a docker command inside of a WRF docker container).
 
 ```
-docker run -it --name ARW -v /users/gill/DOCKER_STUFF:/wrf/wrfoutput wrf_regtest /bin/tcsh
+docker run -it --name WRF-ARW -v /users/gill/DOCKER_STUFF:/wrf/wrfoutput wrf_regtest /bin/tcsh
 ```
-You are now in the ARW container. You'll notice that the prompt has changed:
+You are now in the WRF-ARW container. You'll notice that the prompt has changed:
 ```
 [wrfuser@cc600ad4caea ~]$
 ```
 
-In another window execute:
-```
-docker run -it --name NMM -v /users/gill/DOCKER_STUFF:/wrf/wrfoutput wrf_nmmregtest /bin/tcsh
-```
-You are now in the NMM container.
-
 ## Build executables from source, run tests<a name="Buildexec"/>
 
-Once the WRF containers are built and you are inside of the ARW container, building the WRF code is as usual. 
+Once the WRF container is built and you are inside of the container, building the WRF code is as usual. 
 
-1. From inside the ARW container, do the usual process of `clean`, `configure`, `compile`. 
+1. From inside the container, do the usual process of `clean`, `configure`, `compile`. 
 
 2. Note that while you are inside of the container, you are in a Linux environment. You will be setting up WRF to run natively in a Linux OS, _NOT_ for your host OS. The `configure` options for GNU LInux will always be:
    * 32: serial build
@@ -499,7 +468,7 @@ Diffing SERIAL/wrfout_d01_2000-01-24_12:00:00 wrfout_d01_2000-01-24_12:00:00
 
 ### Checking WRF Chem results<a name="WRFChem"/>
 
-Compiling the chemistry code requires significantly more time and resorces than the ARW build without chemistry. If your compile is killed, open Docker's preferences, go to Resources, and increase Memory and Swap.
+Compiling the chemistry code requires significantly more time and resorces than the WRF-ARW build without chemistry. If your compile is killed, open Docker's preferences, go to Resources, and increase Memory and Swap.
 
 1. Build the WRF-Chem code
 ```
@@ -677,98 +646,38 @@ EOF
 ls -lrt var/build/*.exe will get the same 43 executables.
 ```
 
-### Checking NMM results<a name="WRFNMM"/>
-
-Most developers do not anticipate sharing contributions with the NMM dynamical core. It is mandatory that the existing build of the NMM WRF model work with the new code, a peaceful co-existence. This is an example of negative testing: tests need to be undertaken to demonstrate that no harm has been done to the existing NMM WRF capabilities. This testing must be done inside the NMM container. A couple of NMM-specific environment variables are required to be set prior to the build. The ARW tests are much smaller than the NMM tests. While the ARW jobs are able to run with only 2 GB of memory, the NMM jobs use 8 GB. 
-
-1. Build the NMM WRF code
-```
-cd WRF
-setenv WRF_NMM_CORE 1
-setenv HWRF 1
-configure -d << EOF
-34
-EOF
-compile nmm_real >& foo
-ls -ls main/*.exe
-39756 -rwxr-xr-x 1 wrfuser wrf 40708544 Apr  7 18:55 main/real_nmm.exe
-49948 -rwxr-xr-x 1 wrfuser wrf 51144032 Apr  7 18:55 main/wrf.exe
-```
-2. Run the NMM WRF code
-```
-cd test/nmm_real
-ln -sf /wrf/Data/nmm_hwrf/* .
-cp /wrf/Namelists/weekly/nmm_hwrf/namelist.input.1NE namelist.input
-mpirun -np 3 --oversubscribe real_nmm.exe 
-mpirun -np 3 --oversubscribe wrf.exe
-```
-3. Check the NMM WRF output
-
-This includes looking at the standard print out, looking for the "SUCCESS" message.
-```
-tail rsl.out.0000
-Timing for main: time 2012-10-28_06:09:30 on domain   2:    0.37067 elapsed seconds
-Timing for main: time 2012-10-28_06:09:45 on domain   2:    0.51848 elapsed seconds
-Timing for main: time 2012-10-28_06:09:45 on domain   1:   12.89504 elapsed seconds
-Timing for main: time 2012-10-28_06:10:00 on domain   2:    0.36900 elapsed seconds
-Timing for Writing wrfout_d02_2012-10-28_06:10:00 for domain        2:    1.00879 elapsed seconds
-Timing for main: time 2012-10-28_06:10:15 on domain   2:    1.52304 elapsed seconds
-Timing for main: time 2012-10-28_06:10:30 on domain   2:    0.36961 elapsed seconds
-Timing for main: time 2012-10-28_06:10:30 on domain   1:    4.61200 elapsed seconds
-Timing for Writing wrfout_d01_2012-10-28_06:10:30 for domain        1:    7.46972 elapsed seconds
-d01 2012-10-28_06:10:30 wrf: SUCCESS COMPLETE WRF
-```
-
-Verify that there are two time periods in the output (check both domains):
-```
-ncdump -h wrfout_d01_2012-10-28_06:00:00 | grep Time | grep UNLIMITED
-	Time = UNLIMITED ; // (2 currently)
-ncdump -h wrfout_d02_2012-10-28_06:00:00 | grep Time | grep UNLIMITED
-	Time = UNLIMITED ; // (2 currently)
-```
-
-Check that there are no NaN values in the history output (check both domains):
-```
-ncdump wrfout_d01_2012-10-28_06:00:00 | grep -i nan
-ncdump wrfout_d02_2012-10-28_06:00:00 | grep -i nan
-```
-4. For NMM, the following run-time tests should be conducted:
-   * 1NE
-   * 2NE
-   * 3NE
-
 ## Docker Clean Up<a name="Cleanup"/>
 
 When running docker containers, approximately 5-6 GB of disk space is used per container. Exiting from a container simply stops the container, but does not kill the container process. Similarly, removing the container process does not remove the docker WRF images. 
 
 ### Stop, re-enter, and remove a docker container<a name="Stop"/>
 
-From a host OS terminal window and while you are still in the docker container in another terminal window, you can see the running containers:
+From a host OS terminal window and while you are still in the docker container in another terminal window, you can see the running container:
 ```
 docker ps -a
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
-cc600ad4caea        wrf_regtest         "/usr/bin/entrypoint…"   3 minutes ago       Up 2 minutes                            ARW
+cc600ad4caea        wrf_regtest         "/usr/bin/entrypoint…"   3 minutes ago       Up 2 minutes                            WRF-ARW
 ```
 Once you exit the docker container, the status of the container changes from `Up` to `Exited`.
 ```
 docker ps -a
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                     PORTS               NAMES
-cc600ad4caea        wrf_regtest         "/usr/bin/entrypoint…"   4 minutes ago       Exited (0) 5 seconds ago                       ARW
+cc600ad4caea        wrf_regtest         "/usr/bin/entrypoint…"   4 minutes ago       Exited (0) 5 seconds ago                       WRF-ARW
 ```
 You can get back into that exact container:
 ```
-docker start -ai ARW
+docker start -ai WRF-ARW
 ```
 Once a container is running, other host OS terminal windows may enter the same container:
 ```
-docker exec -it ARW /bin/tcsh
+docker exec -it WRF-ARW /bin/tcsh
 ```
 Once the docker container status is `Exited`, the container may be removed. This step is typically used when building a new container. Removing the container is also required when the intention is to remove the docker image (by default, you cannot remove an image that has a container).
 
 To remove a docker container, first exit all processes from the container (just `exit` from inside the container in each terminal window). Then stop the container, and then remove the container.
 ```
-docker stop ARW
-docker rm ARW
+docker stop WRF-ARW
+docker rm WRF-ARW
 ```
 
 ### Remove a docker image<a name="RemoveImage"/>
@@ -777,12 +686,11 @@ What docker images are available to remove:
 ```
 docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED              SIZE
-wrf_nmmregtest      latest              13b80465a2f4        2 days ago           5.78GB
 wrf_regtest         latest              cb75a489c00c        About a minute ago   5.67 GB
 davegill/wrf-coop   fourteenthtry       41a5030914ca        10 minutes ago       5.55 GB
 davegill/wrf-coop   sixthtry            c36f5f2b0cc6        3 months ago         5.32GB
 ```
-As mentioned previously, leave the `wrf-coop` images alone. To remove the images that made both the `ARW` and `NMM` containers (in the above example):
+As mentioned previously, leave the `wrf-coop` image alone. To remove the image that made the `WRF-ARW` container (in the above example):
 ```
 docker rmi 13b80465a2f4 d7dd1400f486
 ```
